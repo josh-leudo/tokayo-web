@@ -303,10 +303,12 @@
         setMsg(T.dup,"ok");
       } else {
         var d=""; try{ d=(await res.json()).message||""; }catch(e){}
-        setMsg(T.saveErr(d),"err");
+        setMsg(T.saveErr(d)+" [HTTP "+res.status+"]","err");
       }
     }catch(e){
-      setMsg(T.conn,"err");
+      var info=(e&&e.name?e.name:"Error")+(e&&e.message?" — "+e.message:"");
+      setMsg(T.conn+" ("+info+")","err");
+      if(window.console) console.error("[waitlist]", e);
     }finally{ clearTimeout(timer); btn.disabled=false; }
   });
 </script>
