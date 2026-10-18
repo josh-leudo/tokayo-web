@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tokayo — Lista de espera</title>
+<meta name="description" content="Acceso anticipado a Tokayo, la app de productividad y coworking basada en body doubling. Únete a la lista de espera.">
+
+<meta property="og:title" content="Tokayo — Tu lugar te espera">
+<meta property="og:description" content="App de productividad y coworking con body doubling. Conéctate con profesionales que tampoco quieren trabajar solos. Los primeros 1.000 reciben 3 meses de Tokayo Pro gratis.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Playfair+Display:ital,wght@1,600&display=swap">
+
+<style>
+  /* ── Tokayo · waitlist ────────────────────────────────────────────────────
+     Una sola pantalla (100dvh, sin scroll). Fondo = imagen de marca ("tokayo"
+     en contorno); el contenido se superpone centrado. Form con frames
+     anidados: blanco › orangered (correo + SO) › verde Send.
+     Idioma automático (ES/EN) según el navegador del visitante.             */
+  :root{
+    --brand:   #E03E1A;  /* orange red — marca */
+    --green:   #c2de3d;  /* acid green 500 — botón Send */
+    --green-d: #222c07;  /* texto sobre verde */
+    --lime:    #d3ea5c;  /* acid green 400 — 友よ / acentos */
+    --lime-2:  #e9f5a1;  /* acid green 300 */
+    --ink:     #343333;  /* texto oscuro (chip SO) */
+    --white:   #ffffff;
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--brand);color:var(--white);
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+  }
+
+  .page{
+    position:relative;height:100dvh;min-height:100%;overflow:hidden;display:flex;
+    background-color:var(--brand);
+    background-image:url("assets/bg-mobile.jpg");
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+  }
+  @media (min-width:760px){ .page{background-image:url("assets/bg-desktop.jpg")} }
+
+  /* ── Contenido superpuesto ───────────────────────────────────────────────*/
+  .content{
+    position:relative;z-index:1;margin:auto;width:100%;max-width:700px;
+    padding-left:max(22px,env(safe-area-inset-left,0px));
+    padding-right:max(22px,env(safe-area-inset-right,0px));
+    padding-block:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    gap:clamp(12px,2.3vh,20px);
+  }
+
+  .kanji{font-size:clamp(40px,10vw,78px);line-height:1;color:var(--lime);font-weight:700;letter-spacing:.02em}
+
+  h1{
+    margin:0;font-weight:900;letter-spacing:-.02em;
+    font-size:clamp(30px,7.2vw,56px);line-height:1.08;
+    text-shadow:0 2px 18px rgba(120,20,0,.25);
+  }
+  h1 em{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:600}
+
+  .sub{margin:0;font-size:clamp(14.5px,3.4vw,17px);line-height:1.45;color:rgba(255,255,255,.95);max-width:42ch}
+  .sub strong{font-weight:900}
+
+  /* ── Form: frames anidados ───────────────────────────────────────────────
+     .pill  → frame blanco exterior
+       .field → frame orangered (izquierda): correo + chip de SO
+       .send  → botón verde (derecha)                                         */
+  .pill{
+    margin-top:2px;width:100%;max-width:600px;
+    background:var(--white);border-radius:999px;padding:7px;
+    display:flex;align-items:center;gap:7px;
+    box-shadow:0 20px 46px rgba(0,0,0,.24);
+  }
+  .field{
+    flex:1 1 auto;min-width:0;background:var(--brand);border-radius:999px;
+    display:flex;align-items:center;gap:6px;padding:6px 7px 6px 22px;
+  }
+  .field input[type=email]{
+    flex:1 1 auto;min-width:0;border:none;background:transparent;outline:none;
+    font-family:inherit;font-size:17px;color:var(--white);padding:13px 0;
+  }
+  .field input[type=email]::placeholder{color:rgba(255,255,255,.82)}
+
+  .os{position:relative;flex:none;display:flex}
+  .os select{
+    appearance:none;-webkit-appearance:none;border:none;cursor:pointer;
+    background:var(--white);color:var(--ink);border-radius:999px;
+    font-family:inherit;font-size:14px;font-weight:700;padding:12px 30px 12px 15px;
+  }
+  .os select:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+  .os::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;
+    border-right:2px solid #5e5c5d;border-bottom:2px solid #5e5c5d;
+    transform:translateY(-70%) rotate(45deg);pointer-events:none}
+
+  .send{
+    flex:none;border:none;cursor:pointer;font-family:inherit;font-weight:900;font-size:16px;
+    color:var(--green-d);background:var(--green);border-radius:999px;
+    padding:16px 26px;display:inline-flex;align-items:center;gap:8px;
+    transition:filter .15s ease,transform .08s ease;
+  }
+  .send:hover{filter:brightness(1.05)}
+  .send:active{transform:translateY(1px)}
+  .send:disabled{opacity:.6;cursor:default}
+  .send svg{width:18px;height:18px}
+
+  .msg{margin:0;font-size:14px;font-weight:700;min-height:1.1em;text-shadow:0 1px 6px rgba(120,20,0,.3)}
+  .msg.ok{color:var(--lime)}
+  .msg.err{color:#ffe08a}
+
+  /* ── Contador + gancho premium ───────────────────────────────────────────*/
+  .counter{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:-2px}
+  .count-line{margin:0;display:inline-flex;align-items:center;gap:9px;font-size:14.5px;color:rgba(255,255,255,.96)}
+  .count-line strong{color:var(--white);font-variant-numeric:tabular-nums}
+  .premium{margin:0;font-size:13px;color:rgba(255,255,255,.9)}
+  .premium b{color:var(--lime);font-weight:900}
+  .dots{display:inline-flex}
+  .dots i{width:22px;height:22px;border-radius:50%;border:2px solid var(--brand);margin-left:-7px;display:inline-block}
+  .dots i:first-child{margin-left:0}
+  .dots i:nth-child(1){background:var(--lime)}
+  .dots i:nth-child(2){background:var(--lime-2)}
+  .dots i:nth-child(3){background:#ffd9c9}
+
+  .foot{position:absolute;left:0;right:0;bottom:0;z-index:1;text-align:center;
+    padding:12px 16px max(12px,env(safe-area-inset-bottom,0px));font-size:12px;color:rgba(255,255,255,.62)}
+  .foot a{color:rgba(255,255,255,.75);text-decoration:none}
+  .foot a:hover{color:#fff;text-decoration:underline}
+
+  @media (max-width:430px){
+    .field{padding-left:16px;gap:4px}
+    .os select{padding-right:26px;padding-left:12px;font-size:13px}
+    .send{padding:15px 16px}
+    .send .txt{display:none}   /* solo ícono en pantallas muy angostas */
+    .send{padding:15px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<main class="page">
+  <div class="content">
+    <div class="kanji" aria-label="tomo yo — amigo">友よ</div>
+
+    <h1 id="headline">Tu lugar te espera,<br>justo <em>aquí</em>.</h1>
+
+    <p class="sub" id="desc">Tokayo es una app de productividad y coworking basada en <strong>body doubling</strong>: conéctate con profesionales que tampoco quieren trabajar solos y mantén el foco, en persona.</p>
+
+    <form class="pill" data-waitlist novalidate>
+      <div class="field">
+        <input type="email" name="email" inputmode="email" autocomplete="email" placeholder="Escribe tu correo" aria-label="Tu correo" required>
+        <span class="os">
+          <select name="os" aria-label="Tu sistema operativo">
+            <option value="android">Android</option>
+            <option value="ios">iPhone</option>
+          </select>
+        </span>
+      </div>
+      <button class="send" type="submit">
+        <span class="txt" id="sendTxt">Enviar</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+      </button>
+    </form>
+
+    <p class="msg" role="status" aria-live="polite"></p>
+
+    <div class="counter">
+      <p class="count-line">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <strong id="count">827</strong>&nbsp;<span id="countLabel">personas ya reservaron su lugar</span>
+      </p>
+      <p class="premium" id="premium">🎁 Los primeros <b>1.000</b> obtienen <b>3 meses de Tokayo Pro gratis</b>.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <a href="https://josh-leudo.github.io/tokayo-legal/privacy.html" id="lnkPrivacy">Privacidad</a> ·
+    <a href="https://josh-leudo.github.io/tokayo-legal/terms.html" id="lnkTerms">Términos</a> ·
+    <a href="https://josh-leudo.github.io/tokayo-legal/" id="lnkSupport">Soporte</a>
+  </div>
+</main>
+
+<script>
+  // ── Idioma automático según el navegador del visitante (ES / EN) ─────────
+  var STR = {
+    es:{
+      locale:"es-CO",
+      headline:'Tu lugar te espera,<br>justo <em>aquí</em>.',
+      desc:'Tokayo es una app de productividad y coworking basada en <strong>body doubling</strong>: conéctate con profesionales que tampoco quieren trabajar solos y mantén el foco, en persona.',
+      placeholder:"Escribe tu correo", emailAria:"Tu correo", osAria:"Tu sistema operativo",
+      send:"Enviar",
+      countLabel:"personas ya reservaron su lugar",
+      premium:'🎁 Los primeros <b>1.000</b> obtienen <b>3 meses de Tokayo Pro gratis</b>.',
+      privacy:"Privacidad", terms:"Términos", support:"Soporte",
+      invalid:"Escribe un correo válido.",
+      notcfg:"Falta configurar la llave de Supabase (ver index.html).",
+      sending:"Enviando…",
+      ok:function(android){return "¡Reservado! "+(android?"Te escribiremos con el acceso a la beta de Android. 🎉":"Te avisamos apenas abramos. 🎉");},
+      dup:"Ya estás en la lista. ¡Gracias! 🎉",
+      saveErr:function(d){return "No pudimos guardarte"+(d?": "+d:". Intenta de nuevo.");},
+      conn:"Error de conexión. Revisa tu internet e intenta de nuevo."
+    },
+    en:{
+      locale:"en-US",
+      headline:'Your spot is waiting<br>for you right <em>here</em>.',
+      desc:'Tokayo is a productivity &amp; coworking app built on <strong>body doubling</strong>: connect with professionals who don’t want to work alone either, and stay focused — in person.',
+      placeholder:"Enter your email", emailAria:"Your email", osAria:"Your operating system",
+      send:"Send",
+      countLabel:"people already reserved their spot",
+      premium:'🎁 The first <b>1,000</b> get <b>3 months of Tokayo Pro free</b>.',
+      privacy:"Privacy", terms:"Terms", support:"Support",
+      invalid:"Enter a valid email.",
+      notcfg:"Supabase key not set (see index.html).",
+      sending:"Sending…",
+      ok:function(android){return "You’re in! "+(android?"We’ll email you access to the Android beta. 🎉":"We’ll let you know as soon as we open. 🎉");},
+      dup:"You’re already on the list. Thanks! 🎉",
+      saveErr:function(d){return "We couldn’t save you"+(d?": "+d:". Try again.");},
+      conn:"Connection error. Check your internet and try again."
+    }
+  };
+  var LANG = (navigator.language||navigator.userLanguage||"es").toLowerCase().indexOf("es")===0 ? "es" : "en";
+  var T = STR[LANG];
+  document.documentElement.lang = LANG;
+
+  function $(s){return document.querySelector(s)}
+  document.getElementById("headline").innerHTML = T.headline;
+  document.getElementById("desc").innerHTML = T.desc;
+  document.getElementById("sendTxt").textContent = T.send;
+  document.getElementById("countLabel").textContent = T.countLabel;
+  document.getElementById("premium").innerHTML = T.premium;
+  document.getElementById("lnkPrivacy").textContent = T.privacy;
+  document.getElementById("lnkTerms").textContent = T.terms;
+  document.getElementById("lnkSupport").textContent = T.support;
+  $("input[name=email]").placeholder = T.placeholder;
+  $("input[name=email]").setAttribute("aria-label", T.emailAria);
+  $("select[name=os]").setAttribute("aria-label", T.osAria);
+
+  // ── Supabase (claves públicas, seguras en el cliente) ────────────────────
+  // Pega abajo tu PUBLISHABLE KEY (sb_publishable_...), de
+  // Supabase → Project Settings → API.
+  var SUPABASE_URL = "https://svqokcfptetyzndjkdjj.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_lVIHR2LmClWI6E9zpEVIew_5mktINfo";
+  var CONFIGURED = SUPABASE_KEY.indexOf("PEGA_AQUI") === -1;
+
+  function sbHeaders(extra){
+    var h = {"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY};
+    if(extra) for(var k in extra) h[k]=extra[k];
+    return h;
+  }
+
+  // ── Contador: muestra un PISO de 150 hasta que los inscritos reales lo
+  //    superen; a partir de ahí, el número real de Supabase. Para un conteo
+  //    100% real desde cero, pon FLOOR = 0.
+  var FLOOR = 150;
+  var realCount = 0;
+  function renderCount(){ document.getElementById("count").textContent = Math.max(FLOOR, realCount).toLocaleString(T.locale); }
+  renderCount();
+  (async function loadCount(){
+    if(!CONFIGURED) return;
+    try{
+      var r = await fetch(SUPABASE_URL+"/rest/v1/rpc/waitlist_count",{
+        method:"POST",headers:sbHeaders({"Content-Type":"application/json"}),body:"{}"
+      });
+      if(!r.ok) return;
+      realCount = parseInt(await r.json(),10)||0;
+      renderCount();
+    }catch(e){/* si no carga, se queda el piso */}
+  })();
+
+  var form = $("form[data-waitlist]");
+  function setMsg(t,k){var el=form.querySelector(".msg");el.textContent=t;el.className="msg"+(k?" "+k:"")}
+
+  form.addEventListener("submit", async function(ev){
+    ev.preventDefault();
+    var email = (form.email.value||"").trim().toLowerCase();
+    var os = form.os.value, android = (os==="android");
+    var btn = form.querySelector(".send");
+
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg(T.invalid,"err"); return; }
+    if(!CONFIGURED){ setMsg(T.notcfg,"err"); return; }
+
+    btn.disabled = true; setMsg(T.sending,"");
+    try{
+      var res = await fetch(SUPABASE_URL+"/rest/v1/waitlist",{
+        method:"POST",
+        headers:sbHeaders({"Content-Type":"application/json","Prefer":"return=minimal"}),
+        body:JSON.stringify({email:email,os:os,source:"landing",user_agent:navigator.userAgent})
+      });
+      if(res.status===201||res.status===200||res.status===204){
+        form.reset();
+        realCount++; renderCount();
+        setMsg(T.ok(android),"ok");
+      } else if(res.status===409){
+        setMsg(T.dup,"ok");
+      } else {
+        var d=""; try{ d=(await res.json()).message||""; }catch(e){}
+        setMsg(T.saveErr(d),"err");
+      }
+    }catch(e){
+      setMsg(T.conn,"err");
+    }finally{ btn.disabled=false; }
+  });
+</script>
+</body>
+</html>
