@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokayo · diagnóstico</title>
+<style>
+  body{font:15px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:0;padding:18px;background:#0b0b0b;color:#7CFC00}
+  h2{color:#fff;margin:0 0 10px;font-family:system-ui}
+  #log{white-space:pre-wrap;word-break:break-word}
+  .ok{color:#7CFC00}.err{color:#ff6b6b}.info{color:#9aa0a6}
+</style>
+</head>
+<body>
+<h2>Tokayo · diagnóstico de conexión</h2>
+<div id="log" class="info">iniciando…</div>
+
+<script>
+  var SUPA = "https://svqokcfptetyzndjkdjj.supabase.co";
+  var KEY  = "sb_publishable_lVIHR2LmClWI6E9zpEVIew_5mktINfo";
+  var log = document.getElementById("log");
+  function L(m, cls){ var d=document.createElement("div"); if(cls)d.className=cls; d.textContent=m; log.appendChild(d); }
+
+  L("navigator.onLine: " + navigator.onLine, "info");
+  L("origen: " + location.origin, "info");
+  L("UA: " + navigator.userAgent, "info");
+
+  // fetch con límite de tiempo para que nada se quede colgado en silencio
+  function fetchT(url, opts, ms){
+    var c = new AbortController();
+    var t = setTimeout(function(){ c.abort(); }, ms);
+    opts = opts || {}; opts.signal = c.signal;
+    return fetch(url, opts).finally(function(){ clearTimeout(t); });
+  }
+
+  async function run(){
+    // TEST 1 — contador (RPC) CON Authorization Bearer
+    try{
+      L("\n[1] POST contador (con Authorization Bearer)…", "info");
+      var t=Date.now();
+      var r=await fetchT(SUPA+"/rest/v1/rpc/waitlist_count",{
+        method:"POST",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
+        body:"{}"
+      }, 8000);
+      L("[1] HTTP "+r.status+"  ("+(Date.now()-t)+" ms)", r.ok?"ok":"err");
+      L("[1] body: "+(await r.text()), "info");
+    }catch(e){ L("[1] ✗ "+e.name+" — "+e.message, "err"); }
+
+    // TEST 2 — INSERT CON Authorization Bearer (como está la web hoy)
+    try{
+      L("\n[2] POST insert (con Authorization Bearer)…", "info");
+      var t2=Date.now();
+      var r2=await fetchT(SUPA+"/rest/v1/waitlist",{
+        method:"POST",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+        body:JSON.stringify({email:"diag_a_"+Date.now()+"@tokayo.app",os:"android",source:"diag"})
+      }, 8000);
+      L("[2] HTTP "+r2.status+"  ("+(Date.now()-t2)+" ms)", (r2.status<300)?"ok":"err");
+      L("[2] body: "+(await r2.text()), "info");
+    }catch(e){ L("[2] ✗ "+e.name+" — "+e.message, "err"); }
+
+    // TEST 3 — INSERT SOLO con apikey (sin Authorization)
+    try{
+      L("\n[3] POST insert (solo apikey, sin Authorization)…", "info");
+      var t3=Date.now();
+      var r3=await fetchT(SUPA+"/rest/v1/waitlist",{
+        method:"POST",
+        headers:{"apikey":KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+        body:JSON.stringify({email:"diag_b_"+Date.now()+"@tokayo.app",os:"ios",source:"diag"})
+      }, 8000);
+      L("[3] HTTP "+r3.status+"  ("+(Date.now()-t3)+" ms)", (r3.status<300)?"ok":"err");
+      L("[3] body: "+(await r3.text()), "info");
+    }catch(e){ L("[3] ✗ "+e.name+" — "+e.message, "err"); }
+
+    L("\n== FIN ==", "ok");
+  }
+  run();
+</script>
+</body>
+</html>
