@@ -288,9 +288,11 @@
     if(!CONFIGURED){ setMsg(T.notcfg,"err"); return; }
 
     btn.disabled = true; setMsg(T.sending,"");
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, 12000);  // nunca se cuelga
     try{
       var res = await fetch(SUPABASE_URL+"/rest/v1/waitlist",{
-        method:"POST",
+        method:"POST",signal:ctrl.signal,
         headers:sbHeaders({"Content-Type":"application/json","Prefer":"return=minimal"}),
         body:JSON.stringify({email:email,os:os,source:"landing",user_agent:navigator.userAgent})
       });
@@ -306,7 +308,7 @@
       }
     }catch(e){
       setMsg(T.conn,"err");
-    }finally{ btn.disabled=false; }
+    }finally{ clearTimeout(timer); btn.disabled=false; }
   });
 </script>
 </body>
