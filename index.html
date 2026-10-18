@@ -136,10 +136,6 @@
   .foot a{color:rgba(255,255,255,.75);text-decoration:none}
   .foot a:hover{color:#fff;text-decoration:underline}
 
-  .dbg{margin:8px 0 0;width:100%;max-width:600px;font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;
-    color:#fff;background:rgba(0,0,0,.4);border-radius:10px;padding:8px 10px;text-align:left;
-    white-space:pre-wrap;word-break:break-word;max-height:34vh;overflow:auto}
-
   @media (max-width:430px){
     .field{padding-left:16px;gap:4px}
     .os select{padding-right:26px;padding-left:12px;font-size:13px}
@@ -185,7 +181,6 @@
       </p>
       <p class="premium" id="premium">🎁 Los primeros <b>1.000</b> obtienen <b>3 meses de Tokayo Pro gratis</b>.</p>
     </div>
-    <pre id="dbg" class="dbg">build 8 · esperando JS…</pre>
   </div>
 
   <div class="foot">
@@ -196,13 +191,6 @@
 </main>
 
 <script>
-  // ── DEBUG temporal (build 8): muestra en pantalla cualquier error o paso ──
-  var dbgEl = document.getElementById("dbg");
-  function DBG(m){ try{ dbgEl.textContent += "\n"+m; }catch(_){ } if(window.console) console.log("[wl]",m); }
-  window.addEventListener("error", function(e){ DBG("‼ ERROR JS: "+(e.message||"")+"  ("+(e.filename||"")+":"+(e.lineno||"")+")"); });
-  window.addEventListener("unhandledrejection", function(e){ DBG("‼ PROMESA RECHAZADA: "+((e.reason&&e.reason.message)||e.reason||"")); });
-  DBG("① script inició");
-
   // ── Idioma automático según el navegador del visitante (ES / EN) ─────────
   var STR = {
     es:{
@@ -293,16 +281,14 @@
 
   form.addEventListener("submit", async function(ev){
     ev.preventDefault();
-    DBG("— submit: click recibido —");
     var email = (form.email.value||"").trim().toLowerCase();
     var os = form.os.value, android = (os==="android");
     var btn = form.querySelector(".send");
 
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg(T.invalid,"err"); DBG("submit: email inválido → "+email); return; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg(T.invalid,"err"); return; }
     if(!CONFIGURED){ setMsg(T.notcfg,"err"); return; }
 
-    btn.disabled = true; setMsg("① enviando…","");
-    DBG("submit: fetch → Supabase (os="+os+")");
+    btn.disabled = true; setMsg(T.sending,"");
     var ctrl = new AbortController();
     var timer = setTimeout(function(){ ctrl.abort(); }, 9000);  // nunca se cuelga
     try{
@@ -311,8 +297,6 @@
         headers:sbHeaders({"Content-Type":"application/json","Prefer":"return=minimal"}),
         body:JSON.stringify({email:email,os:os,source:"landing",user_agent:navigator.userAgent})
       });
-      setMsg("② respuesta HTTP "+res.status+"…","");
-      DBG("submit: fetch ← HTTP "+res.status);
       if(res.status===201||res.status===200||res.status===204){
         form.reset();
         realCount++; renderCount();
@@ -321,16 +305,13 @@
         setMsg(T.dup,"ok");
       } else {
         var d=""; try{ d=(await res.json()).message||""; }catch(e){}
-        setMsg(T.saveErr(d)+" [HTTP "+res.status+"]","err");
+        setMsg(T.saveErr(d),"err");
       }
     }catch(e){
-      var info=(e&&e.name?e.name:"Error")+(e&&e.message?" — "+e.message:"");
-      setMsg("✗ "+info,"err");
-      DBG("submit: CATCH "+info);
+      setMsg(T.conn,"err");
       if(window.console) console.error("[waitlist]", e);
     }finally{ clearTimeout(timer); btn.disabled=false; }
   });
-  DBG("② handler conectado · build 8 · listo para enviar");
 </script>
 </body>
 </html>
