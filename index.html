@@ -256,12 +256,11 @@
     return h;
   }
 
-  // ── Contador: muestra un PISO de 150 hasta que los inscritos reales lo
-  //    superen; a partir de ahí, el número real de Supabase. Para un conteo
-  //    100% real desde cero, pon FLOOR = 0.
-  var FLOOR = 150;
+  // ── Contador: base inicial (150) + inscritos reales de Supabase. Cada envío
+  //    lo sube +1 en vivo (151, 152…). Para un conteo 100% real, pon BASE = 0.
+  var BASE = 150;
   var realCount = 0;
-  function renderCount(){ document.getElementById("count").textContent = Math.max(FLOOR, realCount).toLocaleString(T.locale); }
+  function renderCount(){ document.getElementById("count").textContent = (BASE + realCount).toLocaleString(T.locale); }
   renderCount();
   (async function loadCount(){
     if(!CONFIGURED) return;
