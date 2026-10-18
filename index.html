@@ -289,7 +289,7 @@
   })();
 
   var form = $("form[data-waitlist]");
-  function setMsg(t,k){var el=form.querySelector(".msg");el.textContent=t;el.className="msg"+(k?" "+k:"")}
+  function setMsg(t,k){var el=document.querySelector(".msg");if(!el)return;el.textContent=t;el.className="msg"+(k?" "+k:"")}
 
   form.addEventListener("submit", async function(ev){
     ev.preventDefault();
