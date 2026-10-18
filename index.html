@@ -286,15 +286,16 @@
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg(T.invalid,"err"); return; }
     if(!CONFIGURED){ setMsg(T.notcfg,"err"); return; }
 
-    btn.disabled = true; setMsg(T.sending,"");
+    btn.disabled = true; setMsg("① enviando…","");
     var ctrl = new AbortController();
-    var timer = setTimeout(function(){ ctrl.abort(); }, 12000);  // nunca se cuelga
+    var timer = setTimeout(function(){ ctrl.abort(); }, 9000);  // nunca se cuelga
     try{
       var res = await fetch(SUPABASE_URL+"/rest/v1/waitlist",{
         method:"POST",signal:ctrl.signal,
         headers:sbHeaders({"Content-Type":"application/json","Prefer":"return=minimal"}),
         body:JSON.stringify({email:email,os:os,source:"landing",user_agent:navigator.userAgent})
       });
+      setMsg("② respuesta HTTP "+res.status+"…","");
       if(res.status===201||res.status===200||res.status===204){
         form.reset();
         realCount++; renderCount();
@@ -307,7 +308,7 @@
       }
     }catch(e){
       var info=(e&&e.name?e.name:"Error")+(e&&e.message?" — "+e.message:"");
-      setMsg(T.conn+" ("+info+")","err");
+      setMsg("✗ "+info,"err");
       if(window.console) console.error("[waitlist]", e);
     }finally{ clearTimeout(timer); btn.disabled=false; }
   });
